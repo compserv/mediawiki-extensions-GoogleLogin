@@ -548,7 +548,10 @@ class SpecialGoogleLogin extends SpecialPage {
 	private function onActionCreate( $userInfo, $isGoogleIdFree ) {
 		$out = $this->getOutput();
 		$glConfig = $this->mGoogleLogin->getGLConfig();
-		$userName = $this->getChooseName( $userInfo );
+		$email = $userInfo['emails'][0]['value'];
+		preg_match('/^(.+)@/', $email, $matches);
+		#$userName = $this->getChooseName( $userInfo );
+		$userName = User::getCanonicalName($matches[1]);
 
 		if ( $userName ) {
 			$out->setPageTitle( $this->msg( 'googlelogin-form-choosename-finish-title' )
@@ -569,7 +572,7 @@ class SpecialGoogleLogin extends SpecialPage {
 					if ( $glConfig->get( 'GLNeedsConfirmEmail' ) ) {
 						$user->sendConfirmationMail();
 					} else {
-						$user->confirmEmail();
+						#$user->confirmEmail();
 						$user->saveSettings();
 					}
 					$user->setCookies();
