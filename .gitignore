@@ -3,3 +3,5 @@ vendor
 composer.phar
 cache
 composer.lock
+*.swo
+*.swp

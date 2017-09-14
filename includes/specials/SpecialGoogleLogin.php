@@ -153,13 +153,7 @@ class SpecialGoogleLogin extends SpecialPage {
 		$user = User::newFromGoogleId( $userInfo['id'] );
 
 		// data that will be added to the account information box
-		$data = [
-			'Google-ID' => $userInfo['id'],
-			$this->msg( 'googlelogin-googleuser' )->text() => $userInfo['displayName'],
-			$this->msg( 'googlelogin-email' )->text() => $userInfo['emails'][0]['value'],
-			$this->msg( 'googlelogin-linkstatus' )->text() => ( $user->hasConnectedGoogleAccount() ?
-				$this->msg( 'googlelogin-linked' )->text() : $this->msg( 'googlelogin-unlinked' )->text() ),
-		];
+		$data = [];
 
 		$items = [];
 		// expand the data to ooui elements
@@ -175,22 +169,6 @@ class SpecialGoogleLogin extends SpecialPage {
 			);
 		}
 
-		// create a wrapper panel
-		$container = new OOUI\PanelLayout( [
-			'padded' => true,
-			'expanded' => false,
-			'framed' => true,
-		] );
-
-		// add the fieldset to the wrapper panel and output it
-		$container->appendContent(
-			new OOUI\FieldsetLayout( [
-				'label' => $this->msg( 'googlelogin-information-title' )->text(),
-				'items' => $items,
-			] )
-		);
-
-		$out->addHtml( $container );
 		$this->createOrMerge( $userInfo, $user );
 	}
 
@@ -280,45 +258,15 @@ class SpecialGoogleLogin extends SpecialPage {
 		$out = $this->getOutput();
 
 		$out->addModules( [ 'ext.GoogleLogin.specialGoogleLogin.chooseown' ] );
-		$out->setPageTitle( $this->msg( 'googlelogin-form-choosename-title' )->text() );
+		$out->setPageTitle('Welcome to prot!');
 
-		// create an array of possible usernames
-		$names = [];
-		if ( !$glConfig->get( 'GLReplaceMWLogin' ) ) {
-			$names[$this->msg( 'googlelogin-login-already-registered' )->text()] =
-				'wpAlreadyRegistered';
-		}
-		if ( GoogleLogin::isValidUsername( $userInfo['displayName'] ) ) {
-			$names[$userInfo['displayName']] = 'wpDisplayName';
-		}
-		if ( GoogleLogin::isValidUsername( $userInfo['name']['givenName'] ) ) {
-			$names[$userInfo['name']['givenName']] = 'wpGivenName';
-		}
-		// "Choose own", so the user can pass it's own username
-		$names[$this->msg( 'googlelogin-form-chooseown' )->text() . ':'] = 'wpOwn';
-
-		$co = $request->getVal( 'wpChooseName' );
-
-		$formElements = [
-			'ChooseName' => [
-				'type' => 'radio',
-				'options' => $names,
-				'default' => ( $co !== null ? $co : 'wpOwn' ),
-			],
-			'ChooseOwn' => [
-				'class' => 'HTMLTextField',
-				'default' => $co,
-				'cssclass' => 'mw-googlelogin-wpOwninput ' .
-					( $co === 'wpOwn' || $co === null ? '' : 'hidden' ),
-				'placeholder' => $this->msg( 'googlelogin-form-choosename-placeholder' )->text()
-			],
-		];
+		$formElements = [];
 
 		$htmlForm = HTMLForm::factory( 'ooui', $formElements, $this->getContext(), 'googlelogin-form' );
 		$htmlForm->setId( 'googlelogin-createform' );
 		$htmlForm->addHiddenField( 'action', 'Create' );
 		$htmlForm->addHiddenField( 'wpSecureHash', $this->mGoogleLogin->getRequestToken() );
-		$htmlForm->setWrapperLegendMsg( 'googlelogin-form-choosename' );
+		$htmlForm->setWrapperLegend( 'Next time you click "Login with Google," you should just be directly logged in without any extra steps. Contact compserv@hkn.eecs.berkeley.edu if you have any issues!' );
 		$htmlForm->setSubmitText( $this->msg( 'googlelogin-form-next' )->text() );
 		$htmlForm->setAction( $this->getPageTitle( 'Create' )->getLocalUrl() );
 		$htmlForm->setSubmitCallback( [ 'GoogleLogin', 'submitChooseName' ] );
